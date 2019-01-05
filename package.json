@@ -1,0 +1,21 @@
+{
+  "name": "art",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "art": "nodemon index.js",
+    "client": "npm run start --prefix client",
+    "dev": "concurrently \"npm run art\" \"npm run client\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "concurrently": "^4.1.0",
+    "express": "^4.16.4",
+    "fs": "0.0.1-security",
+    "nodemon": "^1.18.9",
+    "request": "^2.88.0"
+  }
+}
