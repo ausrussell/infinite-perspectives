@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "art": "nodemon index.js",
+    "infinite-perspectives": "nodemon index.js",
     "client": "npm run start --prefix client",
-    "dev": "concurrently \"npm run art\" \"npm run client\""
+    "dev": "concurrently \"npm run infinite-perspectives\" \"npm run client\""
   },
   "author": "",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "express": "^4.16.4",
     "fs": "0.0.1-security",
     "nodemon": "^1.18.9",
+    "react-pointerlock": "^1.1.3",
     "request": "^2.88.0"
   }
 }

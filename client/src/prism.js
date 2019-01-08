@@ -3,9 +3,11 @@ import * as THREE from "three";
 // import * as files from "./files.js";
 const devURl = "http://localhost:5000/";
 
-class Prism extends Component {
+class Prism extends THREE.Mesh {
+  //Component
   constructor(props) {
     super(props);
+    // debugger;
     this.fileName = props.file;
     // this.rotation = switch Math.random )
     // console.log("files", files);
@@ -38,25 +40,15 @@ class Prism extends Component {
     mesh.position.y = this.randomInRange(5, 40);
     // this.scene.add(tri);
     this.mesh = mesh;
+    this.rotater = this.mesh.rotateY(this.rotateConst);
     this.createPicturePrism();
     return this;
   }
   createPicturePrism() {
-    let picturePrismWidth = this.prismWidth * 1.1,
-      picturePrismLength = this.prismLength * 1.1;
-    let shape = new THREE.Shape();
-    shape.moveTo(-this.prismWidth, -this.prismLength);
-    shape.lineTo(-this.prismLength, this.prismWidth);
-    shape.lineTo(this.prismLength, this.prismWidth);
-    shape.lineTo(-this.prismWidth, -this.prismLength);
-
-    let extrudeSettings = {
-      depth: 100
-    };
     var loader = new THREE.TextureLoader();
     let prismGeometry = new THREE.PlaneGeometry(10, 10); //(20, 30, 30); //new THREE.SphereGeometry(50, 20, 20); //shape, extrudeSettings); //new THREE.PlaneGeometry(10, 10);PlaneGeometry
 
-    let imgSrc = "/images/" + this.fileName;
+    let imgSrc = "/images/user/" + this.fileName;
     var tex = new THREE.TextureLoader().load(imgSrc, tex => {
       tex.needsUpdate = true;
       pictureMesh.scale.set(1, tex.image.height / tex.image.width, 1.0);
@@ -68,25 +60,28 @@ class Prism extends Component {
     // this.mesh.geometry.vertices[0];
     let prismMaterial = new THREE.MeshLambertMaterial({
       color: 0xffffff,
-      map: tex
+      map: tex,
+      side: THREE.DoubleSide
       // wireframe: true
     });
     let pictureMesh = new THREE.Mesh(prismGeometry, prismMaterial);
-    // pictureMesh.rotateY(Math.PI / 2);
+    pictureMesh.position.x = 5.1; //this.mesh.geometry.parameters.width;
+    pictureMesh.rotateY(Math.PI / 2);
     // pictureMesh.position.x = this.mesh.position.x + 18;
     //
-    let offset = this.mesh.position.x < 0 ? 2 : -2;
-    pictureMesh.position.x = this.mesh.position.x + offset;
-    pictureMesh.position.y = this.mesh.position.y;
-    pictureMesh.position.z = this.mesh.position.z;
+    // let offset = this.mesh.position.x < 0 ? 2 : -2;
+    // pictureMesh.position.x = this.mesh.position.x + offset;
+    // pictureMesh.position.y = this.mesh.position.y;
+    // pictureMesh.position.z = this.mesh.position.z;
     // pictureMesh.position.z = this.mesh.position.z;
     this.pictureMesh = pictureMesh;
-    let meshVertices = this.mesh.geometry.vertices;
-    this.pictureMesh.geometry.vertices[0] = meshVertices[0];
-    this.pictureMesh.geometry.vertices[1] = meshVertices[1];
-    this.pictureMesh.geometry.vertices[2] = meshVertices[3];
-    this.pictureMesh.geometry.vertices[3] = meshVertices[4];
-    this.pictureMesh.geometry.verticesNeedUpdate = true;
+
+    // let meshVertices = this.mesh.geometry.vertices;
+    // this.pictureMesh.geometry.vertices[0] = meshVertices[0];
+    // this.pictureMesh.geometry.vertices[1] = meshVertices[1];
+    // this.pictureMesh.geometry.vertices[2] = meshVertices[3];
+    // this.pictureMesh.geometry.vertices[3] = meshVertices[4];
+    // this.pictureMesh.geometry.verticesNeedUpdate = true;
 
     console.log("this.mesh", this.mesh);
     console.log("this.pictureMesh", this.pictureMesh);
@@ -97,15 +92,16 @@ class Prism extends Component {
   }
   add(scene) {
     scene.add(this.mesh);
-    scene.add(this.pictureMesh);
+    this.mesh.add(this.pictureMesh);
+    // scene.add(this.pictureMesh);
   }
   rotate() {
     // debugger;
-    // this.mesh.rotateZ(this.rotateConst);
+    this.mesh.rotateZ(this.rotateConst);
     // this.pictureMesh.rotateZ(this.rotateConst);
-
+    // this.mesh.rotater();
     this.mesh.rotateY(this.rotateConst);
-    this.pictureMesh.rotateY(this.rotateConst);
+    // this.pictureMesh.rotateY(this.rotateConst);
     // this.pictureMesh.rotateX(this.rotateConst);
     // this.pictureMesh.rotateY(this.rotateConst);
   }

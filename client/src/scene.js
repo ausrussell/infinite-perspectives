@@ -2,6 +2,11 @@ import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import * as THREE from "three";
 import Prism from "./prism";
+import createDomeRoof from "./roof";
+import createFlooring from "./Floor";
+import Flaneur from "./Flaneur";
+import InputManager from "./InputManager";
+import PointerLock from "react-pointerlock";
 
 const ArtFileNames = [];
 
@@ -14,65 +19,28 @@ class Scene extends Component {
     this.animate = this.animate.bind(this);
     this.prisms = [];
     this.rotateConst = 0.01;
+    this.moveDelta = 0.2;
+    this.clock = new THREE.Clock(false);
+    this.INV_MAX_FPS = 1 / 60;
+    this.frameDelta = 0;
   }
 
-  createDomeRoof() {
-    let domeGeometry = new THREE.SphereGeometry(
-      100,
-      15,
-      15,
-      0,
-      Math.PI,
-      0,
-      -Math.PI / 2
-    ); //, Math.PI, Math.PI
-    let domeTexture = new THREE.TextureLoader().load(
-      "images/rough-white-grunge-brick-wall-texture.jpg"
-    );
-    domeTexture.wrapS = domeTexture.wrapT = THREE.RepeatWrapping;
-    domeTexture.repeat.set(12, 12);
-    let domeMaterial = new THREE.MeshPhongMaterial({ map: domeTexture });
-    let dome = new THREE.Mesh(domeGeometry, domeMaterial);
-    dome.material.side = THREE.DoubleSide;
-    this.scene.add(dome);
-  }
   processArtFileNames(json) {
     let fileNames = json;
     console.log("ArtFileNames", fileNames);
 
-    let i = fileNames.length;
-    for (i; i > 0; i--) {
+    let i = fileNames.length - 1;
+    for (i; i >= 0; i--) {
+      console.log("fileNames[i]", i, fileNames[i]);
       this.prisms[i] = new Prism({ file: fileNames[i] });
       this.prisms[i].add(this.scene);
     }
-
-    // this.prisms.forEach(p => p.add(this.scene));
   }
   createPrism() {
     console.log("about  to fetch dir");
     fetch("/readdir")
       .then(res => res.json())
       .then(json => this.processArtFileNames(json));
-  }
-
-  addFlooring() {
-    let geometry = new THREE.PlaneGeometry(1000, 1000, 10, 10);
-    geometry.rotateX(-Math.PI / 2);
-    geometry.rotateY(-Math.PI / 2);
-    let floorTexture = new THREE.TextureLoader().load(
-      "images/wood-texture1.jpg"
-    );
-    floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
-    floorTexture.repeat.set(15, 40);
-    let material = new THREE.MeshPhongMaterial({
-      color: 0x996633,
-      specular: 0x050505,
-      shininess: 100,
-      map: floorTexture,
-      side: THREE.DoubleSide
-    });
-    let mesh = new THREE.Mesh(geometry, material);
-    this.scene.add(mesh);
   }
 
   addLights() {
@@ -101,13 +69,23 @@ class Scene extends Component {
     light = new THREE.PointLight(0xffffff, 1, 0);
 
     // Specify the light's position
-    light.position.set(1, 1, 1);
+    light.position.set(1, 10, 1);
 
     // Add the light to the scene
     // this.scene.add(light);
   }
 
-  componentDidMount() {
+  handleKeydownDirection(direction) {
+    console.log("handleKeydown");
+    this.flaneur.moveDirection[direction] = true;
+  }
+
+  handleKeyupDirection(direction) {
+    console.log("handleKeyup");
+    this.flaneur.moveDirection[direction] = false;
+  }
+
+  initScene() {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
 
@@ -116,13 +94,12 @@ class Scene extends Component {
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     const geometry = new THREE.BoxGeometry(20, 21, 1);
     const material = new THREE.MeshLambertMaterial({ color: "#433F81" });
-    const cube = new THREE.Mesh(geometry, material);
-    camera.position.y = 14;
-    camera.position.x = 0;
-    camera.position.z = 50;
-    cube.position.x = 50;
+
+    // camera.position.y = 154;
+    // camera.position.x = 0;
+    camera.position.y = 5;
+
     this.scene = scene;
-    this.scene.add(cube);
 
     renderer.setClearColor("#000000");
     renderer.setSize(width, height);
@@ -130,11 +107,22 @@ class Scene extends Component {
     this.camera = camera;
     this.renderer = renderer;
     this.material = material;
-    this.cube = cube;
+
+    this.flaneur = new Flaneur();
+    this.flaneur.add(this.camera);
+    this.scene.add(this.flaneur);
     this.addLights();
     this.createPrism();
-    this.createDomeRoof();
-    this.addFlooring();
+    this.scene.add(createDomeRoof());
+    this.scene.add(createFlooring());
+    // new InputManager(this);
+    console.log("this.renderer.domElement", this.renderer.domElement);
+    this.inputManager = new InputManager(this, this.renderer.domElement);
+    // this.scene.add();
+  }
+
+  componentDidMount() {
+    this.initScene();
 
     this.mount.appendChild(this.renderer.domElement);
     this.start();
@@ -156,12 +144,15 @@ class Scene extends Component {
   }
 
   animate() {
-    this.cube.rotation.x += 0.01;
-    this.cube.rotation.y += 0.01;
-
     // this.tri.rotateZ(this.rotateConst);
     this.prisms.forEach(p => p.rotate());
 
+    // this.frameDelta += this.clock.getDelta();
+    // while (this.frameDelta >= this.INV_MAX_FPS) {
+    //   this.flaneur.update(this.INV_MAX_FPS);
+    //   this.frameDelta -= this.INV_MAX_FPS;
+    // }
+    this.flaneur.update(this.INV_MAX_FPS);
     this.renderScene();
     this.frameId = window.requestAnimationFrame(this.animate);
   }
@@ -172,12 +163,14 @@ class Scene extends Component {
 
   render() {
     return (
-      <div
-        style={{ width: "100%", height: "1000px" }}
-        ref={mount => {
-          this.mount = mount;
-        }}
-      />
+      <div>
+        <div
+          style={{ width: "100%", height: "1000px" }}
+          ref={mount => {
+            this.mount = mount;
+          }}
+        />
+      </div>
     );
   }
 }
