@@ -3,8 +3,10 @@ import PointerLock from "react-pointerlock";
 export default class InputManager {
   constructor(scene, domElement) {
     // debugger;
+    this.scene = scene;
     this.domElement = domElement || document.body;
     console.log("this.domElement", this.domElement);
+    // this.pointerLock = "enabled";
     // this.domElement.addEventListener(
     //   "mousedown",
     //   function() {
@@ -62,8 +64,11 @@ export default class InputManager {
       },
       false
     );
-    // this.boundOnMouseDown = evt => this.onMouseDown(evt);
-    // this.domElement.addEventListener("mousedown", this.boundOnMouseDown, false);
+    this.boundOnMouseDown = evt => this.onMouseDown(evt);
+    this.domElement.addEventListener("mousedown", this.boundOnMouseDown, false);
+    this.boundOnMouseUp = evt => this.onMouseUp(evt);
+
+    this.boundOnMouseMove = evt => this.onMouseMove(evt);
   }
 
   onPointerlockChange(event) {
@@ -93,5 +98,49 @@ export default class InputManager {
 
   onPointerlockError(event) {
     console.error("PointerLockControls: Unable to use Pointer Lock API");
+  }
+
+  onMouseDown(event) {
+    if (this.pointerLock) {
+      this.domElement.requestPointerLock();
+    } else {
+      this.domElement.addEventListener(
+        "mousemove",
+        this.boundOnMouseMove,
+        false
+      );
+      this.domElement.addEventListener("mouseup", this.boundOnMouseUp, false);
+    }
+    //
+    // if (this.world.gameMode !== undefined)
+    // {
+    //     this.world.gameMode.handleAction(event, 'mouse' + event.button, true);
+    // }
+  }
+  setPointerLock(enabled) {
+    this.pointerLock = enabled;
+    this.domElement.addEventListener("mousemove", this.boundOnMouseMove, false);
+  }
+  onMouseMove(event) {
+    this.scene.handleMouseMove(event, event.movementX, event.movementY);
+  }
+
+  onMouseUp(event) {
+    if (!this.pointerLock) {
+      this.domElement.removeEventListener(
+        "mousemove",
+        this.boundOnMouseMove,
+        false
+      );
+      this.domElement.removeEventListener(
+        "mouseup",
+        this.boundOnMouseUp,
+        false
+      );
+    }
+
+    // if (this.world.gameMode !== undefined) {
+    //   this.world.gameMode.handleAction(event, "mouse" + event.button, false);
+    // }
   }
 }

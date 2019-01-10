@@ -77,6 +77,11 @@ class Flaneur extends THREE.Mesh {
     this.rotation.set(r.x, r.y, r.z);
     this._aggregateRotation.set(0, 0, 0);
   }
+  rotate(x, y, z) {
+    this._aggregateRotation.x += x;
+    this._aggregateRotation.y += y;
+    this._aggregateRotation.z += z;
+  }
 }
 // Flaneur.prototype = Object.create(THREE.Mesh.prototype);
 // Flaneur.prototype.constructor = Flaneur;

@@ -85,6 +85,11 @@ class Scene extends Component {
     this.flaneur.moveDirection[direction] = false;
   }
 
+  handleMouseMove(event, x, y) {
+    console.log("x,y", x, y);
+    this.flaneur.rotate(y, x, 0);
+  }
+
   initScene() {
     const width = this.mount.clientWidth;
     const height = this.mount.clientHeight;
@@ -118,6 +123,7 @@ class Scene extends Component {
     // new InputManager(this);
     console.log("this.renderer.domElement", this.renderer.domElement);
     this.inputManager = new InputManager(this, this.renderer.domElement);
+    this.inputManager.setPointerLock(true);
     // this.scene.add();
   }
 

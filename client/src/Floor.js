@@ -5,7 +5,7 @@ const createFlooring = function() {
   geometry.rotateX(-Math.PI / 2);
   geometry.rotateY(-Math.PI / 2);
   let floorTexture = new THREE.TextureLoader().load(
-    "images/textures/wood-texture1.jpg"
+    "images/user/domestic_interior_2.jpg"
   );
   floorTexture.wrapS = floorTexture.wrapT = THREE.RepeatWrapping;
   floorTexture.repeat.set(15, 40);
