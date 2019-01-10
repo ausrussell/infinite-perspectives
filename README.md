@@ -1,4 +1,4 @@
 # infinite-perspectives
 
 Build your own art gallery.
-<img src="./static/images/dev.architecture.png" />
+<img src="https://raw.githubusercontent.com/ausrussell/infinite-perspectives/master/static/images/dev/architecture.png" />
